@@ -112,11 +112,15 @@ namespace MovieIdeas.Controllers
         }
 
         // GET: Movie/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewBag.ErrorMessage = "Delete failed. Try again, and if the problem persists see your system administrator.";
             }
             Movie movie = db.Movies.Find(id);
             if (movie == null)
@@ -131,9 +135,19 @@ namespace MovieIdeas.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Movie movie = db.Movies.Find(id);
-            db.Movies.Remove(movie);
-            db.SaveChanges();
+            try
+            {
+                Movie movie = db.Movies.Find(id);
+                db.Movies.Remove(movie);
+                db.SaveChanges();
+            }
+            catch (DataException/* dex */)
+            {
+
+                //Log the error (uncomment dex variable name and add a line here to write a log.
+                return RedirectToAction("Delete", new { id = id, saveChangesError = true });
+            }
+           
             return RedirectToAction("Index");
         }
 
