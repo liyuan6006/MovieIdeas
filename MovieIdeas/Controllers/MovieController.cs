@@ -16,12 +16,16 @@ namespace MovieIdeas.Controllers
         private MovieIdeasContext db = new MovieIdeasContext();
 
         // GET: Movie
-        public ActionResult Index(string sortOrder)
+        public ActionResult Index(string sortOrder,string searchString)
         {
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
             var movies = from s in db.Movies
                          select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                movies = movies.Where(s => s.Name.Contains(searchString));
+            }
             switch (sortOrder)
             {
                 case "name_desc":
