@@ -16,9 +16,28 @@ namespace MovieIdeas.Controllers
         private MovieIdeasContext db = new MovieIdeasContext();
 
         // GET: Movie
-        public ActionResult Index()
+        public ActionResult Index(string sortOrder)
         {
-            return View(db.Movies.ToList());
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
+            var movies = from s in db.Movies
+                         select s;
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    movies = movies.OrderByDescending(s => s.Name);
+                    break;
+                case "Date":
+                    movies = movies.OrderBy(s => s.EnrollmentDate);
+                    break;
+                case "date_desc":
+                    movies = movies.OrderByDescending(s => s.EnrollmentDate);
+                    break;
+                default:
+                    movies = movies.OrderBy(s => s.Name);
+                    break;
+            }
+            return View(movies.ToList());
         }
 
         // GET: Movie/Details/5
