@@ -131,14 +131,29 @@ namespace MovieIdeas.Controllers
         }
 
         // POST: Movie/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult Delete(int id)
         {
             try
             {
-                Movie movie = db.Movies.Find(id);
-                db.Movies.Remove(movie);
+                /*
+                 * If improving performance in a high-volume application is a priority, 
+                 * you could avoid an unnecessary SQL query to retrieve the row 
+                 * by replacing the lines of code that call the Find and Remove methods with the following code:
+                */
+
+                //Movie movie = db.Movies.Find(id);
+                //db.Movies.Remove(movie);
+
+                /*
+                 This code instantiates a Movie entity using only the primary key value 
+                 and then sets the entity state to Deleted. T
+                 hat's all that the Entity Framework needs in order to delete the entity.
+                 */
+                Movie movieToDelete = new Movie() { ID = id };
+                db.Entry(movieToDelete).State = EntityState.Deleted;
+
                 db.SaveChanges();
             }
             catch (DataException/* dex */)
