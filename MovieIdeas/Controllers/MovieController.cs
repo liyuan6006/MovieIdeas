@@ -8,7 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using MovieIdeas.DAL;
 using MovieIdeas.Models;
-
+using PagedList;
 namespace MovieIdeas.Controllers
 {
     public class MovieController : Controller
@@ -16,10 +16,21 @@ namespace MovieIdeas.Controllers
         private MovieIdeasContext db = new MovieIdeasContext();
 
         // GET: Movie
-        public ActionResult Index(string sortOrder,string searchString)
+        public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
+            ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+            ViewBag.CurrentFilter = searchString;
+
             var movies = from s in db.Movies
                          select s;
             if (!String.IsNullOrEmpty(searchString))
@@ -41,7 +52,9 @@ namespace MovieIdeas.Controllers
                     movies = movies.OrderBy(s => s.Name);
                     break;
             }
-            return View(movies.ToList());
+            int pageSize = 3;
+            int pageNumber = (page ?? 1);
+            return View(movies.ToPagedList(pageNumber,pageSize));
         }
 
         // GET: Movie/Details/5
